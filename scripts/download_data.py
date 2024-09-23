@@ -6,7 +6,8 @@ import logging
 
 CSV_FILENAME = "iris.csv"
 DESCRIPTION_FILENAME = "data_information.md"
-PROJECT_ROOT = Path().absolute().parent
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def get_relative_path(path: Path):

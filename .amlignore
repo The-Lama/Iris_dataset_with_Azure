@@ -10,6 +10,9 @@
 !.amlignore
 
 # Folders
+docs/
+mlops/
+scripts/
 .git/
 
 # Files

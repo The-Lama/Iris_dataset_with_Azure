@@ -11,11 +11,26 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def get_relative_path(path: Path):
+    """
+    Convert the given path to a relative path with respect to PROJECT_ROOT, if possible.
+
+    If the path is inside PROJECT_ROOT, the returned path will be relative to it.
+    If the path cannot be made relative (i.e., it is outside PROJECT_ROOT), the original
+        absolute path is returned.
+
+    Args:
+        path (Path): A file system path to be converted.
+
+    Returns:
+        Path: The relative path if the original path is within PROJECT_ROOT, otherwise
+            the original absolute path.
+    """
     try:
         relative_path = path.relative_to(PROJECT_ROOT)
     except ValueError:
         relative_path = path
     return relative_path
+
 
 def ensure_directory_exists(directory: Path):
     """Ensure that the directory exists, creating it if nescessary."""
@@ -26,10 +41,11 @@ def ensure_directory_exists(directory: Path):
     except OSError as e:
         logging.error(f"Failed to save content to {relative_dir}: {e}")
 
+
 def save_file(path: Path, save_func, content):
     """
-    Generic function to save content to a file if it doesn't already exist.
-    
+    Save content to a file if it doesn't already exist.
+
     Parameters:
     - path: The path where the file should be saved.
     - save_func: A function that handles the actual saving logic for the content.
@@ -46,25 +62,39 @@ def save_file(path: Path, save_func, content):
     except OSError as e:
         logging.error(f"failed to create directory {relative_path}: {e}")
 
+
 def save_csv(path: Path, data: pd.DataFrame):
-    """Save a dataframe to a csv file"""
-    save_func = lambda p, df: df.to_csv(p, index=False)
+    """Save a dataframe to a csv file."""
+
+    def save_func(p: Path, df: pd.DataFrame):
+        df.to_csv(p, index=False)
+
     save_file(path, save_func, data)
 
+
 def save_dataset_description(path: Path, description: str):
-    """Save the dataset description to a file"""
-    save_func = lambda p, desc: p.write_text(desc)
+    """Save the dataset description to a file."""
+
+    def save_func(p: Path, desc: str):
+        p.write_text(desc)
+
     save_file(path, save_func, description)
 
+
 def parse_arguments():
-    """parse CLI arguments"""
+    """Parse CLI arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=Path, default=PROJECT_ROOT / "mlops" / "iris" / "data")
+    parser.add_argument(
+        "--data-dir", type=Path, default=PROJECT_ROOT / "mlops" / "iris" / "data"
+    )
     parser.add_argument("--docs-dir", type=Path, default=PROJECT_ROOT / "docs")
     parser.add_argument("--csv-filename", type=str, default=CSV_FILENAME)
-    parser.add_argument("--description-filename", type=str, default=DESCRIPTION_FILENAME)
+    parser.add_argument(
+        "--description-filename", type=str, default=DESCRIPTION_FILENAME
+    )
 
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

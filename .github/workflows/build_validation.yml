@@ -8,18 +8,23 @@ on:
 jobs:
   Build_Validation:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
-      - uses: actions/Checkout@v4
+      - uses: actions/checkout@v4
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
-      - name: Install dependencies
-        run: |
-          conda env create -f mlops/iris/environments/iris-dev-environment.yml
-          conda activate iris-dev
+        with:
+          activate-environment: iris-dev
+          environment-file: mlops/iris/environments/iris-dev-environment.yml
+          auto-activate-base: false
+
       - name: lint with flake8
-        run: flake8 .
+        run: |
+          flake8 .
         

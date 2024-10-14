@@ -1,0 +1,7 @@
+name: iris-azure
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - azure-ai-ml
+  - azure-identity

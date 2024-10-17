@@ -21,7 +21,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: iris-dev
-          environment-file: mlops/iris/environments/iris-dev-environment.yml
+          environment-file: mlops/iris/environments/dev-environment.yml
           auto-activate-base: false
 
       - name: lint with flake8

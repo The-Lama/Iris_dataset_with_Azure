@@ -5,3 +5,5 @@ channels:
 dependencies:
   - azure-ai-ml
   - azure-identity
+  - azure-core
+  - python-dotenv

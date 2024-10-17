@@ -1,0 +1,10 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: train_model
+display_name: TrainModel
+version: 1
+type: command
+code: ./../
+environment:
+  conda_file: mlops/iris/environments/ml-environment.yml
+comand: >-
+  python src/train.py

@@ -5,6 +5,6 @@ version: 1
 type: command
 code: ./../
 environment:
-  conda_file: mlops/iris/environments/ml-environment.yml
-comand: >-
+  conda_file: ./../environments/ml-environment.yml
+command: >-
   python src/train.py

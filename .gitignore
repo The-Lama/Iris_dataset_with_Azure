@@ -1,6 +1,5 @@
 *.env
 *.amltmp
-*.almtemp
 **/__pycache__
 
 ! .env.sample

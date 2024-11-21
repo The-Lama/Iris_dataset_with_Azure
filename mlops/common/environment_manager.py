@@ -1,21 +1,10 @@
-import hashlib
-import json
 import logging
+from mlops.common.environment_helpers import calculate_hash
+from mlops.common.environment_helpers import EnvironmentConfig
 from typing import Optional
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import Environment
 from azure.core.exceptions import ResourceNotFoundError
-
-
-def calculate_hash(environment: Environment) -> str:
-    """Calculate a hash value of an environment."""
-    conda_contents = environment.conda_file
-    conda_contents_serialized = json.dumps(conda_contents, sort_keys=True)
-
-    base_image = environment.image.strip()
-
-    data = f"{conda_contents_serialized}:{base_image}"
-    return hashlib.sha256(data.encode()).hexdigest()
 
 
 def get_existing_environment(client: MLClient, name: str) -> Optional[Environment]:
@@ -27,9 +16,7 @@ def get_existing_environment(client: MLClient, name: str) -> Optional[Environmen
         return None
 
 
-def get_environment(
-    client: MLClient, base_image, conda_file_path, name, description
-) -> Environment:
+def get_environment(client: MLClient, config: EnvironmentConfig) -> Environment:
     """
     Create and return an Azure ML environment.
 
@@ -37,19 +24,24 @@ def get_environment(
     a new version is created.
     """
     new_environment = Environment(
-        image=base_image, conda_file=conda_file_path, name=name, description=description
+        image=config.base_image,
+        conda_file=config.conda_file_path,
+        name=config.name,
+        description=config.description,
     )
     new_env_hash = calculate_hash(new_environment)
     logging.debug(f"New environment hash: {new_env_hash}")
 
-    existing_environment = get_existing_environment(client, name)
+    existing_environment = get_existing_environment(client, config.name)
     if existing_environment:
         existing_env_hash = calculate_hash(existing_environment)
         logging.debug(f"existing environment hash: {existing_env_hash}")
 
         if new_env_hash == existing_env_hash:
-            logging.info(f"Environment '{name}' is up to date. No update needed.")
+            logging.info(
+                f"Environment '{config.name}' is up to date. No update needed."
+            )
             return existing_environment
 
-    logging.info(f"Creating or updating environment '{name}'.")
+    logging.info(f"Creating or updating environment '{config.name}'.")
     return client.environments.create_or_update(new_environment)

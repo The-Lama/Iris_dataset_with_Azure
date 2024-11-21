@@ -8,7 +8,8 @@ from azure.core.exceptions import ClientAuthenticationError
 from azure.ai.ml import load_component
 from azure.ai.ml import MLClient
 from azure.ai.ml.dsl import pipeline
-from mlops.common.environment_management import get_environment
+from mlops.common.environment_manager import get_environment
+from mlops.common.environment_helpers import EnvironmentConfig
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -101,13 +102,13 @@ if __name__ == "__main__":
         logging.error("Invalid credentials.. try again")
         logging.error(f"Authentication failed: {e.message}")
 
-    environment = get_environment(
-        client=client,
+    environment_config = EnvironmentConfig(
         base_image=args.env_base_image_name,
         conda_file_path="mlops/iris/environments/ml-environment.yml",
         name="iris-ml",
         description="environment to run the ml code",
     )
+    environment = get_environment(client, environment_config)
 
     pipeline_job = construct_pipeline(args.cluster_name, environment)
     execute_pipeline(client, pipeline_job)

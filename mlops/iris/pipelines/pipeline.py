@@ -104,14 +104,10 @@ if __name__ == "__main__":
     environment = get_environment(
         client=client,
         base_image=args.env_base_image_name,
-        conda_file="mlops/iris/environments/ml-environment.yml",
+        conda_file_path="mlops/iris/environments/ml-environment.yml",
         name="iris-ml",
         description="environment to run the ml code",
     )
 
-    logging.debug(f"environment details: {environment}")
-    environment_old = client.environments.get(name=environment.name, label="latest")
-    logging.debug(f"old environment details: {environment_old}")
-
-    pipeline_job = construct_pipeline(args.cluster_name, environment_old)
+    pipeline_job = construct_pipeline(args.cluster_name, environment)
     execute_pipeline(client, pipeline_job)

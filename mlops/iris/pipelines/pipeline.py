@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.core.exceptions import ClientAuthenticationError
 from azure.ai.ml import load_component
-from azure.ai.ml import MLClient
+from azure.ai.ml import MLClient, Input
 from azure.ai.ml.dsl import pipeline
 from mlops.common.environment_manager import get_environment
 from mlops.common.environment_helpers import EnvironmentConfig
@@ -18,23 +18,30 @@ PIPELINE_COMPONENTS = {}
 
 
 @pipeline
-def iris_pipeline():
-    """Define the iris pipeline."""
+def iris_pipeline(raw_data):
+    """Full pipeline on the iris dataset."""
     train_component = PIPELINE_COMPONENTS["train"]
+    prepare_component = PIPELINE_COMPONENTS["prepare"]
+    prepare_component(raw_data=raw_data)
     train_component()
 
 
 def construct_pipeline(cluster_name, environment):
     """Construct the iris pipeline by loading the components."""
-    logging.debug("loading pipeline components...")
     components_dir = Path("mlops/iris/components")
+    data_dir = Path("mlops/iris/data")
+
+    logging.debug("loading pipeline components...")
+    prepare_component = load_component(source=components_dir / "prepare.yml")
     train_component = load_component(source=components_dir / "train.yml")
     train_component.environment = environment
+    prepare_component.environment = environment
 
     logging.debug("Constructing pipeline...")
     PIPELINE_COMPONENTS["train"] = train_component
+    PIPELINE_COMPONENTS["prepare"] = prepare_component
 
-    pipeline_job = iris_pipeline()
+    pipeline_job = iris_pipeline(Input(type="uri_file", path=data_dir / "iris.csv"))
     pipeline_job.compute = cluster_name
 
     return pipeline_job

@@ -1,0 +1,34 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: prepare_data
+display_name: PrepareData
+description: Prepare the Iris dataset for training
+version: 1
+
+type: command
+inputs:
+  raw_data:
+    type: uri_file
+    description: Path to the input raw CSV file.
+  test_size:
+    type: number
+    description: Test size ratio
+    default: 0.2
+  random_state:
+    type: integer
+    description: Random seed for reproducability
+    default: 42
+outputs:
+  prepared_data:
+    type: uri_folder
+    description: Directory where the prepared data will be saved.
+
+code: ./../
+environment:
+  description: 'this will be dynamically set by the pipeline configuration.'
+
+command: >-
+  python src/prepare.py
+  --raw_data ${{inputs.raw_data}}
+  --prepared_data ${{outputs.prepared_data}}
+  --test_size ${{inputs.test_size}}
+  --random_state ${{inputs.random_state}}

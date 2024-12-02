@@ -28,7 +28,7 @@ environment:
 
 command: >-
   python src/prepare.py
-  --raw_data ${{inputs.raw_data}}
-  --prepared_data ${{outputs.prepared_data}}
+  --raw_data_path ${{inputs.raw_data}}
+  --prepared_data_path ${{outputs.prepared_data}}
   --test_size ${{inputs.test_size}}
   --random_state ${{inputs.random_state}}

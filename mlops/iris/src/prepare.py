@@ -46,22 +46,17 @@ def prepare_data(
 
 
 if __name__ == "__main__":
-    default_data_path = Path("mlops/iris/data")
-    prepared_data_path = default_data_path / "prepared_data"
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--raw_data_path",
         type=str,
         required=True,
-        default=default_data_path,
         help="path to the raw data file.",
     )
     parser.add_argument(
         "--prepared_data_path",
         type=str,
         required=True,
-        default=prepared_data_path,
         help="path to save the prepared data.",
     )
     parser.add_argument("--test_size", type=float, required=True)

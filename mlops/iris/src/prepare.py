@@ -59,8 +59,8 @@ if __name__ == "__main__":
         required=True,
         help="path to save the prepared data.",
     )
-    parser.add_argument("--test_size", type=float, required=True)
-    parser.add_argument("--random_state", type=int, required=True)
+    parser.add_argument("--test_size", type=float)
+    parser.add_argument("--random_state", type=int)
 
     args = parser.parse_args()
 

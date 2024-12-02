@@ -20,9 +20,12 @@ PIPELINE_COMPONENTS = {}
 @pipeline
 def iris_pipeline(raw_data):
     """Full pipeline on the iris dataset."""
-    train_component = PIPELINE_COMPONENTS["train"]
     prepare_component = PIPELINE_COMPONENTS["prepare"]
-    prepare_component(raw_data=raw_data)
+    transform_component = PIPELINE_COMPONENTS["transform"]
+    train_component = PIPELINE_COMPONENTS["train"]
+
+    prepare = prepare_component(raw_data=raw_data)
+    transform_component(prepared_data=prepare.outputs.prepared_data)
     train_component()
 
 
@@ -33,13 +36,17 @@ def construct_pipeline(cluster_name, environment):
 
     logging.debug("loading pipeline components...")
     prepare_component = load_component(source=components_dir / "prepare.yml")
+    transform_component = load_component(source=components_dir / "transform.yml")
     train_component = load_component(source=components_dir / "train.yml")
-    train_component.environment = environment
+
     prepare_component.environment = environment
+    transform_component.environment = environment
+    train_component.environment = environment
 
     logging.debug("Constructing pipeline...")
-    PIPELINE_COMPONENTS["train"] = train_component
     PIPELINE_COMPONENTS["prepare"] = prepare_component
+    PIPELINE_COMPONENTS["transform"] = transform_component
+    PIPELINE_COMPONENTS["train"] = train_component
 
     pipeline_job = iris_pipeline(Input(type="uri_file", path=data_dir / "iris.csv"))
     pipeline_job.compute = cluster_name

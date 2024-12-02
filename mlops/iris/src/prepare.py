@@ -49,10 +49,6 @@ if __name__ == "__main__":
     default_data_path = Path("mlops/iris/data")
     prepared_data_path = default_data_path / "prepared_data"
 
-    import sys
-
-    logging.debug(f"python version: {sys.version}")
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--raw_data_path",

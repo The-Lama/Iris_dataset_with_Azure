@@ -1,10 +1,25 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 name: train_model
 display_name: TrainModel
+description: Train the model on the data usually submitted by the transfrom component.
 version: 1
+
 type: command
-code: ./../
+inputs:
+  transformed_data:
+    type: uri_folder
+    description:
+      Directory that contiains both train.csv and test.csv files,
+      typically generated during data transformation.
+outputs:
+  model_output:
+    type: uri_folder
+
+code: ./../../../
 environment:
-  conda_file: ./../environments/ml-environment.yml
+  description: 'this will be dynamically set by the pipeline configuration.'
+
 command: >-
-  python src/train.py
+  python -m mlops.iris.src.train
+  --transformed_data_path ${{inputs.transformed_data}}
+  --model_output_path ${{outputs.model_output}}

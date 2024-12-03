@@ -25,8 +25,8 @@ def iris_pipeline(raw_data):
     train_component = PIPELINE_COMPONENTS["train"]
 
     prepare = prepare_component(raw_data=raw_data)
-    transform_component(prepared_data=prepare.outputs.prepared_data)
-    train_component()
+    transform = transform_component(prepared_data=prepare.outputs.prepared_data)
+    train_component(transformed_data=transform.outputs.transformed_data)
 
 
 def construct_pipeline(cluster_name, environment):

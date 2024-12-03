@@ -1,5 +1,6 @@
 [flake8]
 
 ignore = D100 D104
-
+per-file-ignores =
+    mlops/iris/src/train.py: N806
 max-line-length = 88

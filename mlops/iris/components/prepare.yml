@@ -22,12 +22,12 @@ outputs:
     type: uri_folder
     description: Directory where the prepared data will be saved.
 
-code: ./../
+code: ./../../../
 environment:
   description: 'this will be dynamically set by the pipeline configuration.'
 
 command: >-
-  python src/prepare.py
+  python -m mlops.iris.src.prepare
   --raw_data_path ${{inputs.raw_data}}
   --prepared_data_path ${{outputs.prepared_data}}
   --test_size ${{inputs.test_size}}

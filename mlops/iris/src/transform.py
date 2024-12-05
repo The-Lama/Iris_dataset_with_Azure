@@ -1,11 +1,24 @@
 import argparse
 import logging
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler
-from utils import read_csv
+
+import utils
 
 logging.basicConfig(level=logging.INFO)
+
+
+def combine_features_with_target(
+    features: pd.DataFrame, target: np.ndarray, columns: list
+):
+    """Combine the feature Dataframe with the target Series to a new Dataframe."""
+    feature_columns = columns[:-1]
+    target_column = columns[-1]
+    combined_df = pd.DataFrame(features, columns=feature_columns)
+    combined_df[target_column] = target
+    return combined_df
 
 
 def transform_data(prepared_data_path: str, transformed_data_path: str):
@@ -14,39 +27,29 @@ def transform_data(prepared_data_path: str, transformed_data_path: str):
     logging.debug(f"Prepared data path: {prepared_data_path}")
     logging.debug(f"transformed data path: {transformed_data_path}")
 
-    prepared_data_path = Path(prepared_data_path)
     transformed_data_path = Path(transformed_data_path)
     transformed_data_path.mkdir(parents=True, exist_ok=True)
 
-    train_file = prepared_data_path / "train.csv"
-    test_file = prepared_data_path / "test.csv"
+    train_data, test_data = utils.load_train_and_test_data(prepared_data_path)
+    columns = train_data.columns
 
-    train_data = read_csv(train_file)
-    test_data = read_csv(test_file)
+    train_features = utils.get_features(train_data)
+    test_features = utils.get_features(test_data)
 
-    feature_columns = train_data.columns[:-1]
-    target_column = train_data.columns[-1]
-
-    train_features = train_data[feature_columns]
-    train_target = train_data[target_column]
-
-    test_features = test_data[feature_columns]
-    test_target = test_data[target_column]
+    train_target = utils.get_targets(train_data)
+    test_target = utils.get_targets(test_data)
 
     scaler = StandardScaler()
     scaler.fit(train_features)
     train_features_normalized = scaler.transform(train_features)
     test_features_normalized = scaler.transform(test_features)
 
-    transformed_train_data = pd.DataFrame(
-        train_features_normalized, columns=train_features.columns
+    transformed_train_data = combine_features_with_target(
+        train_features_normalized, train_target, columns
     )
-    transformed_train_data[target_column] = train_target
-
-    transformed_test_data = pd.DataFrame(
-        test_features_normalized, columns=test_features.columns
+    transformed_test_data = combine_features_with_target(
+        test_features_normalized, test_target, columns
     )
-    transformed_test_data[target_column] = test_target
 
     transformed_train_data_path = transformed_data_path / "train.csv"
     transformed_test_data_path = transformed_data_path / "test.csv"

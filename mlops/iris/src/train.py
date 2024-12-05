@@ -2,7 +2,8 @@ import argparse
 import logging
 from pathlib import Path
 from sklearn.linear_model import LinearRegression
-from utils import read_csv
+
+import utils
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,24 +14,16 @@ def train_model(transformed_data_path: str, model_output_path: str):
     logging.debug(f"Transformed data path: {transformed_data_path}")
     logging.debug(f"Model output path: {model_output_path}")
 
-    transformed_data_path = Path(transformed_data_path)
     model_output_path = Path(model_output_path)
     model_output_path.mkdir(parents=True, exist_ok=True)
 
-    train_file = transformed_data_path / "train.csv"
-    test_file = transformed_data_path / "test.csv"
+    train_data, test_data = utils.load_train_and_test_data(transformed_data_path)
 
-    train_data = read_csv(train_file)
-    test_data = read_csv(test_file)
+    X_train = utils.get_features(train_data)
+    y_train = utils.get_targets(train_data)
 
-    feature_columns = train_data.columns[:-1]
-    target_column = train_data.columns[-1]
-
-    X_train = train_data[feature_columns]
-    y_train = train_data[target_column]
-
-    X_test = test_data[feature_columns]
-    y_test = test_data[target_column]
+    X_test = utils.get_features(test_data)
+    y_test = utils.get_targets(test_data)
 
     model = LinearRegression()
     model.fit(X_train, y_train)

@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler
-from mlops.iris.src.utils import read_csv
+from utils import read_csv
 
 logging.basicConfig(level=logging.INFO)
 

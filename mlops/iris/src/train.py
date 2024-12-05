@@ -2,7 +2,7 @@ import argparse
 import logging
 from pathlib import Path
 from sklearn.linear_model import LinearRegression
-from mlops.iris.src.utils import read_csv
+from utils import read_csv
 
 logging.basicConfig(level=logging.INFO)
 

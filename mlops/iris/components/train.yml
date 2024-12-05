@@ -15,11 +15,11 @@ outputs:
   model_output:
     type: uri_folder
 
-code: ./../../../
+code: ../src/
 environment:
   description: 'this will be dynamically set by the pipeline configuration.'
 
 command: >-
-  python -m mlops.iris.src.train
+  python -m train
   --transformed_data_path ${{inputs.transformed_data}}
   --model_output_path ${{outputs.model_output}}

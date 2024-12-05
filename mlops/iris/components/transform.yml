@@ -16,11 +16,11 @@ outputs:
     type: uri_folder
     description: Directory where the transformed data will be saved.
     
-code: ./../../../
+code: ../src/
 environment:
   description: 'this will be dynamically set by the pipeline configuration.'
 
 command: >-
-  python -m mlops.iris.src.transform
+  python -m transform
   --prepared_data_path ${{inputs.prepared_data}}
   --transformed_data_path ${{outputs.transformed_data}}

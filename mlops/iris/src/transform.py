@@ -1,7 +1,6 @@
 import argparse
 import logging
 import pandas as pd
-import numpy as np
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 
@@ -11,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def combine_features_with_target(
-    features: pd.DataFrame, target: np.ndarray, columns: list
+    features: pd.DataFrame, target: pd.Series, columns: list
 ):
     """Combine the feature Dataframe with the target Series to a new Dataframe."""
     feature_columns = columns[:-1]

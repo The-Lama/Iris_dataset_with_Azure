@@ -5,7 +5,7 @@ import mlflow
 import mlflow.sklearn
 import pandas as pd
 from pathlib import Path
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 
 import utils
 
@@ -36,7 +36,7 @@ def train_model(transformed_data_path: str, model_output_path: str):
     model_output_path.mkdir(parents=True, exist_ok=True)
 
     with mlflow.start_run():
-        model = LinearRegression()
+        model = LogisticRegression()
         model.fit(X_train, y_train)
 
         training_score = model.score(X_train, y_train)

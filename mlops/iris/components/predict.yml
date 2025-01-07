@@ -1,0 +1,31 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: predict_data
+display_name: PredictData
+description: Predict the test data based on the supplied model.
+version: 1
+
+type: command
+inputs:
+  transformed_data:
+    type: uri_folder
+    description: 
+      Directory that contains both train.csv and test.csv files,
+      which were used for training the model.
+  model:
+    type: uri_folder
+    description:
+      Model used for prediction. Usually the one from the train component.
+outputs:
+  predictions:
+    type: uri_folder
+    description: Directory where the predictions will be stored.
+    
+code: ../src/
+environment:
+  description: 'this will be dynamically set by the pipeline configuration.'
+
+command: >-
+  python -m predict
+  --model_path ${{inputs.model}}
+  --test_data_path ${{inputs.transformed_data}}
+  --predictions_path ${{outputs.predictions}}

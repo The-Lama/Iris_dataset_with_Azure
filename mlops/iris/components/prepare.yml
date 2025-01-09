@@ -6,7 +6,7 @@ version: 1
 
 type: command
 inputs:
-  raw_data:
+  raw_data_path:
     type: uri_file
     description: Path to the input raw CSV file.
   test_size:
@@ -18,7 +18,7 @@ inputs:
     description: Random seed for reproducability
     default: 42
 outputs:
-  prepared_data:
+  prepared_data_dir:
     type: uri_folder
     description: Directory where the prepared data will be saved.
 
@@ -28,7 +28,7 @@ environment:
 
 command: >-
   python -m prepare
-  --raw_data_path ${{inputs.raw_data}}
-  --prepared_data_path ${{outputs.prepared_data}}
+  --raw_data_path ${{inputs.raw_data_path}}
+  --prepared_data_dir ${{outputs.prepared_data_dir}}
   --test_size ${{inputs.test_size}}
   --random_state ${{inputs.random_state}}

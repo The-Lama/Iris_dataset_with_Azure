@@ -18,7 +18,7 @@ PIPELINE_COMPONENTS = {}
 
 
 @pipeline
-def iris_pipeline(raw_data):
+def iris_pipeline(raw_data_path):
     """Full pipeline on the iris dataset."""
     prepare_component = PIPELINE_COMPONENTS["prepare"]
     transform_component = PIPELINE_COMPONENTS["transform"]
@@ -26,15 +26,16 @@ def iris_pipeline(raw_data):
     predict_component = PIPELINE_COMPONENTS["predict"]
     evaluate_component = PIPELINE_COMPONENTS["evaluate"]
 
-    prepare = prepare_component(raw_data=raw_data)
-    transform = transform_component(prepared_data=prepare.outputs.prepared_data)
-    train = train_component(transformed_data=transform.outputs.transformed_data)
+    prepare = prepare_component(raw_data_path=raw_data_path)
+    transform = transform_component(prepared_data_dir=prepare.outputs.prepared_data_dir)
+    train = train_component(transformed_data_dir=transform.outputs.transformed_data_dir)
     predict = predict_component(
-        transformed_data=transform.outputs.transformed_data, model=train.outputs.model
+        transformed_data_dir=transform.outputs.transformed_data_dir,
+        model_dir=train.outputs.model_dir,
     )
     evaluate_component(
-        ground_truth_dir=transform.outputs.transformed_data,
-        predictions_dir=predict.outputs.predictions,
+        ground_truth_dir=transform.outputs.transformed_data_dir,
+        predictions_dir=predict.outputs.predictions_dir,
     )
 
 

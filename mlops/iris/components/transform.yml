@@ -6,13 +6,13 @@ version: 1
 
 type: command
 inputs:
-  prepared_data:
+  prepared_data_dir:
     type: uri_folder
     description: 
       Directory that contains both train.csv and test.csv files,
       typically generated during data preparation.
 outputs:
-  transformed_data:
+  transformed_data_dir:
     type: uri_folder
     description: Directory where the transformed data will be saved.
     
@@ -22,5 +22,5 @@ environment:
 
 command: >-
   python -m transform
-  --prepared_data_path ${{inputs.prepared_data}}
-  --transformed_data_path ${{outputs.transformed_data}}
+  --prepared_data_dir ${{inputs.prepared_data_dir}}
+  --transformed_data_dir ${{outputs.transformed_data_dir}}

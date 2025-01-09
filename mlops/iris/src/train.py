@@ -12,9 +12,9 @@ import utils
 logging.basicConfig(level=logging.INFO)
 
 
-def load_training_data(data_path: str) -> tuple[pd.DataFrame, pd.Series]:
+def load_training_data(data_dir: str) -> tuple[pd.DataFrame, pd.Series]:
     """Load the training data from the directory containing train.csv and test.csv."""
-    train_data, _ = utils.load_train_and_test_data(data_path)
+    train_data, _ = utils.load_train_and_test_data(data_dir)
 
     X_train = utils.get_features(train_data)
     y_train = utils.get_targets(train_data)
@@ -22,18 +22,18 @@ def load_training_data(data_path: str) -> tuple[pd.DataFrame, pd.Series]:
     return X_train, y_train
 
 
-def train_model(transformed_data_path: str, model_output_path: str):
+def train_model(transformed_data_dir: str, model_dir: str):
     """Train the model with the provided data."""
     logging.info("Starting model training.")
-    logging.debug(f"Transformed data path: {transformed_data_path}")
-    logging.debug(f"Model output path: {model_output_path}")
+    logging.debug(f"Transformed data dir: {transformed_data_dir}")
+    logging.debug(f"Model output dir: {model_dir}")
 
     mlflow.autolog()
 
-    X_train, y_train = load_training_data(transformed_data_path)
+    X_train, y_train = load_training_data(transformed_data_dir)
 
-    model_output_path = Path(model_output_path)
-    model_output_path.mkdir(parents=True, exist_ok=True)
+    model_dir = Path(model_dir)
+    model_dir.mkdir(parents=True, exist_ok=True)
 
     with mlflow.start_run():
         model = LogisticRegression()
@@ -42,7 +42,7 @@ def train_model(transformed_data_path: str, model_output_path: str):
         training_score = model.score(X_train, y_train)
         logging.info(f"Model score: {training_score}")
 
-        model_file_path = model_output_path / "model.joblib"
+        model_file_path = model_dir / "model.joblib"
         joblib.dump(model, model_file_path)
         logging.info(f"Model saved to {model_file_path}")
 
@@ -50,19 +50,19 @@ def train_model(transformed_data_path: str, model_output_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--transformed_data_path",
+        "--transformed_data_dir",
         type=str,
         required=True,
-        help="Folder that contains both the train.csv and "
+        help="Directory that contains both the train.csv and "
         "the test.csv for model training.",
     )
     parser.add_argument(
-        "--model_output_path",
+        "--model_dir",
         type=str,
         required=True,
-        help="Folder that saves the model output.",
+        help="Directory that saves the model output.",
     )
 
     args = parser.parse_args()
 
-    train_model(args.transformed_data_path, args.model_output_path)
+    train_model(args.transformed_data_dir, args.model_dir)

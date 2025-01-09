@@ -6,17 +6,17 @@ version: 1
 
 type: command
 inputs:
-  transformed_data:
+  transformed_data_dir:
     type: uri_folder
     description: 
       Directory that contains both train.csv and test.csv files,
       which were used for training the model.
-  model:
+  model_dir:
     type: uri_folder
     description:
       Model used for prediction. Usually the one from the train component.
 outputs:
-  predictions:
+  predictions_dir:
     type: uri_folder
     description: Directory where the predictions will be stored.
     
@@ -26,6 +26,6 @@ environment:
 
 command: >-
   python -m predict
-  --model_path ${{inputs.model}}
-  --test_data_path ${{inputs.transformed_data}}
-  --predictions_path ${{outputs.predictions}}
+  --model_dir ${{inputs.model_dir}}
+  --test_data_dir ${{inputs.transformed_data_dir}}
+  --predictions_dir ${{outputs.predictions_dir}}

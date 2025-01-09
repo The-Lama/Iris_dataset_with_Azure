@@ -8,15 +8,15 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def prepare_data(
-    raw_data_path: str, prepared_data_path: str, test_size: float, random_state: int
+    raw_data_path: str, prepared_data_dir: str, test_size: float, random_state: int
 ):
     """Prepare the iris train data with train and test split."""
     logging.info("Starting data preparation...")
     logging.debug(f"Raw data path: {raw_data_path}")
-    logging.debug(f"Prepared data path: {prepared_data_path}")
+    logging.debug(f"Prepared data path: {prepared_data_dir}")
 
-    prepared_data_path = Path(prepared_data_path)
-    prepared_data_path.mkdir(parents=True, exist_ok=True)
+    prepared_data_dir = Path(prepared_data_dir)
+    prepared_data_dir.mkdir(parents=True, exist_ok=True)
 
     raw_data_path = Path(raw_data_path)
 
@@ -36,8 +36,8 @@ def prepare_data(
         f"{len(test_data)} test samples"
     )
 
-    train_data_path = prepared_data_path / "train.csv"
-    test_data_path = prepared_data_path / "test.csv"
+    train_data_path = prepared_data_dir / "train.csv"
+    test_data_path = prepared_data_dir / "test.csv"
     train_data.to_csv(train_data_path, index=False)
     test_data.to_csv(test_data_path, index=False)
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         help="path to the raw data file.",
     )
     parser.add_argument(
-        "--prepared_data_path",
+        "--prepared_data_dir",
         type=str,
         required=True,
         help="path to save the prepared data.",
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     prepare_data(
         raw_data_path=args.raw_data_path,
-        prepared_data_path=args.prepared_data_path,
+        prepared_data_dir=args.prepared_data_dir,
         test_size=args.test_size,
         random_state=args.random_state,
     )

@@ -6,13 +6,13 @@ version: 1
 
 type: command
 inputs:
-  transformed_data:
+  transformed_data_dir:
     type: uri_folder
     description:
-      Directory that contiains both train.csv and test.csv files,
+      Directory that contains both train.csv and test.csv files,
       typically generated during data transformation.
 outputs:
-  model:
+  model_dir:
     type: uri_folder
 
 code: ../src/
@@ -21,5 +21,5 @@ environment:
 
 command: >-
   python -m train
-  --transformed_data_path ${{inputs.transformed_data}}
-  --model_output_path ${{outputs.model}}
+  --transformed_data_dir ${{inputs.transformed_data_dir}}
+  --model_dir ${{outputs.model_dir}}

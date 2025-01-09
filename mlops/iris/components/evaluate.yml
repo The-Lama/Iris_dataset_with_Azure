@@ -1,0 +1,29 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: evaluate_model
+display_name: EvaluateModel
+description: Evaluate the predicted data from the model against the ground truth.
+version: 1
+
+type: command
+inputs:
+  ground_truth_dir:
+    type: uri_folder
+    description: Directory that contains the test.csv file which will be used as the ground truth.
+  predictions_dir:
+    type: uri_folder
+    description: Directory that contains the predictions.csv file which will be used as the predictions.
+outputs:
+    evaluation_report:
+      type: uri_file
+      description: File that will save the evaluation.
+
+code: ../src/
+environment:
+  description: 'this will be dynamically set by the pipeline configuration.'
+
+command: >-
+  python -m evaluate
+  --ground_truth_dir ${{inputs.ground_truth_dir}}
+  --predictions_dir ${{inputs.predictions_dir}}
+  --evaluation_report ${{outputs.evaluation_report}}
+

@@ -25,6 +25,7 @@ def iris_pipeline(raw_data_path):
     train_component = PIPELINE_COMPONENTS["train"]
     predict_component = PIPELINE_COMPONENTS["predict"]
     evaluate_component = PIPELINE_COMPONENTS["evaluate"]
+    register_component = PIPELINE_COMPONENTS["register"]
 
     prepare = prepare_component(raw_data_path=raw_data_path)
     transform = transform_component(prepared_data_dir=prepare.outputs.prepared_data_dir)
@@ -33,9 +34,14 @@ def iris_pipeline(raw_data_path):
         transformed_data_dir=transform.outputs.transformed_data_dir,
         model_dir=train.outputs.model_dir,
     )
-    evaluate_component(
+    evaluate = evaluate_component(
         ground_truth_dir=transform.outputs.transformed_data_dir,
         predictions_dir=predict.outputs.predictions_dir,
+    )
+    register_component(
+        model_name="Logistic_Regression_on_Iris_Dataset",
+        model_metadata_path=train.outputs.model_metadata_path,
+        evaluation_report_path=evaluate.outputs.evaluation_report_path,
     )
 
 
@@ -50,12 +56,14 @@ def construct_pipeline(cluster_name, environment):
     train_component = load_component(source=components_dir / "train.yml")
     predict_component = load_component(source=components_dir / "predict.yml")
     evaluate_component = load_component(source=components_dir / "evaluate.yml")
+    register_component = load_component(source=components_dir / "register.yml")
 
     prepare_component.environment = environment
     transform_component.environment = environment
     train_component.environment = environment
     predict_component.environment = environment
     evaluate_component.environment = environment
+    register_component.environment = environment
 
     logging.debug("Constructing pipeline...")
     PIPELINE_COMPONENTS["prepare"] = prepare_component
@@ -63,6 +71,7 @@ def construct_pipeline(cluster_name, environment):
     PIPELINE_COMPONENTS["train"] = train_component
     PIPELINE_COMPONENTS["predict"] = predict_component
     PIPELINE_COMPONENTS["evaluate"] = evaluate_component
+    PIPELINE_COMPONENTS["register"] = register_component
 
     pipeline_job = iris_pipeline(Input(type="uri_file", path=data_dir / "iris.csv"))
     pipeline_job.compute = cluster_name

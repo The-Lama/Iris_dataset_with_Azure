@@ -14,66 +14,76 @@ from mlops.common.environment_helpers import EnvironmentConfig
 
 logging.basicConfig(level=logging.DEBUG)
 
-PIPELINE_COMPONENTS = {}
+
+def load_pipeline_components(components_dir: Path) -> dict:
+    """Load pipeline components from YAML definitions."""
+    logging.debug("Loading pipeline components...")
+    components = {}
+
+    component_names = [
+        "prepare",
+        "transform",
+        "train",
+        "predict",
+        "evaluate",
+        "register",
+    ]
+
+    for name in component_names:
+        component_path = components_dir / f"{name}.yml"
+        if component_path.exists():
+            components[name] = load_component(source=component_path)
+            logging.debug(f"Component '{name}' loaded sucessfully")
+        else:
+            logging.error(
+                f"Component definition '{name}.yml' was not found in {components_dir}"
+            )
+    return components
 
 
-@pipeline
-def iris_pipeline(raw_data_path):
-    """Full pipeline on the iris dataset."""
-    prepare_component = PIPELINE_COMPONENTS["prepare"]
-    transform_component = PIPELINE_COMPONENTS["transform"]
-    train_component = PIPELINE_COMPONENTS["train"]
-    predict_component = PIPELINE_COMPONENTS["predict"]
-    evaluate_component = PIPELINE_COMPONENTS["evaluate"]
-    register_component = PIPELINE_COMPONENTS["register"]
-
-    prepare = prepare_component(raw_data_path=raw_data_path)
-    transform = transform_component(prepared_data_dir=prepare.outputs.prepared_data_dir)
-    train = train_component(transformed_data_dir=transform.outputs.transformed_data_dir)
-    predict = predict_component(
-        transformed_data_dir=transform.outputs.transformed_data_dir,
-        model_dir=train.outputs.model_dir,
-    )
-    evaluate = evaluate_component(
-        ground_truth_dir=transform.outputs.transformed_data_dir,
-        predictions_dir=predict.outputs.predictions_dir,
-    )
-    register_component(
-        model_name="Logistic_Regression_on_Iris_Dataset",
-        model_metadata_path=train.outputs.model_metadata_path,
-        evaluation_report_path=evaluate.outputs.evaluation_report_path,
-    )
-
-
-def construct_pipeline(cluster_name, environment):
-    """Construct the iris pipeline by loading the components."""
-    components_dir = Path("mlops/iris/components")
+def define_iris_pipeline(components: dict) -> pipeline:
+    """Define the Iris pipeline by chaining components."""
     data_dir = Path("mlops/iris/data")
+    raw_data_input = Input(type="uri_file", path=data_dir / "iris.csv")
 
-    logging.debug("loading pipeline components...")
-    prepare_component = load_component(source=components_dir / "prepare.yml")
-    transform_component = load_component(source=components_dir / "transform.yml")
-    train_component = load_component(source=components_dir / "train.yml")
-    predict_component = load_component(source=components_dir / "predict.yml")
-    evaluate_component = load_component(source=components_dir / "evaluate.yml")
-    register_component = load_component(source=components_dir / "register.yml")
+    @pipeline
+    def iris_pipeline(raw_data_path):
+        """Full pipeline on the iris dataset."""
+        prepare = components["prepare"](raw_data_path=raw_data_path)
+        transform = components["transform"](
+            prepared_data_dir=prepare.outputs.prepared_data_dir
+        )
+        train = components["train"](
+            transformed_data_dir=transform.outputs.transformed_data_dir
+        )
+        predict = components["predict"](
+            transformed_data_dir=transform.outputs.transformed_data_dir,
+            model_dir=train.outputs.model_dir,
+        )
+        evaluate = components["evaluate"](
+            ground_truth_dir=transform.outputs.transformed_data_dir,
+            predictions_dir=predict.outputs.predictions_dir,
+        )
+        components["register"](
+            model_name="Logistic_Regression_on_Iris_Dataset",
+            model_metadata_path=train.outputs.model_metadata_path,
+            evaluation_report_path=evaluate.outputs.evaluation_report_path,
+        )
 
-    prepare_component.environment = environment
-    transform_component.environment = environment
-    train_component.environment = environment
-    predict_component.environment = environment
-    evaluate_component.environment = environment
-    register_component.environment = environment
+    return iris_pipeline(raw_data_input)
 
-    logging.debug("Constructing pipeline...")
-    PIPELINE_COMPONENTS["prepare"] = prepare_component
-    PIPELINE_COMPONENTS["transform"] = transform_component
-    PIPELINE_COMPONENTS["train"] = train_component
-    PIPELINE_COMPONENTS["predict"] = predict_component
-    PIPELINE_COMPONENTS["evaluate"] = evaluate_component
-    PIPELINE_COMPONENTS["register"] = register_component
 
-    pipeline_job = iris_pipeline(Input(type="uri_file", path=data_dir / "iris.csv"))
+def construct_pipeline_job(cluster_name, environment):
+    """Construct the iris pipeline job."""
+    components_dir = Path("mlops/iris/components")
+
+    components = load_pipeline_components(components_dir)
+    for name, component in components.items():
+        component.environment = environment
+        logging.info(f"Assigned environment to component '{name}'")
+
+    logging.debug("Constructing pipeline job...")
+    pipeline_job = define_iris_pipeline(components)
     pipeline_job.compute = cluster_name
 
     return pipeline_job
@@ -82,14 +92,16 @@ def construct_pipeline(cluster_name, environment):
 def execute_pipeline(client, pipeline_job):
     """Execute the Iris pipeline."""
     logging.debug("Submitting pipeline job...")
-    pipeline_job = client.jobs.create_or_update(
-        pipeline_job, experiment_name="ML_with_Iris_Dataset"
-    )
+    try:
+        pipeline_job = client.jobs.create_or_update(
+            pipeline_job, experiment_name="ML_with_Iris_Dataset"
+        )
+        logging.info(f"{pipeline_job.name} has been submitted successfully.")
+    except Exception as e:
+        logging.error(f"Failed to submit pipeline job: {e}")
 
-    logging.info(f"{pipeline_job.name} has been submitted")
 
-
-def load_configuration():
+def load_configuration() -> argparse.Namespace:
     """Load configuration from environment variables or command-line arguments."""
     parser = argparse.ArgumentParser("pipeline")
     parser.add_argument(
@@ -126,20 +138,25 @@ def load_configuration():
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    load_dotenv()
-    args = load_configuration()
-
+def create_ml_client(args: argparse.Namespace) -> MLClient:
+    """Create an Azure MLClient using the provided configuration."""
     try:
-        client = MLClient(
+        return MLClient(
             DefaultAzureCredential(),
             subscription_id=args.subscription_id,
             resource_group_name=args.resource_group_name,
             workspace_name=args.workspace_name,
         )
     except ClientAuthenticationError as e:
-        logging.error("Invalid credentials.. try again")
-        logging.error(f"Authentication failed: {e.message}")
+        logging.error("Authentication failed. Please verify credentials.")
+        raise e
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    args = load_configuration()
+
+    client = create_ml_client(args)
 
     environment_config = EnvironmentConfig(
         base_image=args.env_base_image_name,
@@ -149,5 +166,5 @@ if __name__ == "__main__":
     )
     environment = get_environment(client, environment_config)
 
-    pipeline_job = construct_pipeline(args.cluster_name, environment)
+    pipeline_job = construct_pipeline_job(args.cluster_name, environment)
     execute_pipeline(client, pipeline_job)

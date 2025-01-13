@@ -15,7 +15,7 @@ from sklearn.metrics import (
 logging.basicConfig(level=logging.DEBUG)
 
 
-def evaluate(ground_truth_dir: str, predictions_dir: str, evaluation_report: str):
+def evaluate(ground_truth_dir: str, predictions_dir: str, evaluation_report_path: str):
     """Evaluate the model predictions with the test data."""
     logging.debug("evaluating..")
     ground_truth_file = Path(ground_truth_dir) / "test.csv"
@@ -42,7 +42,7 @@ def evaluate(ground_truth_dir: str, predictions_dir: str, evaluation_report: str
         "confusion_matrix": confusion.tolist(),
     }
 
-    with open(evaluation_report, "w") as f:
+    with open(evaluation_report_path, "w") as f:
         json.dump(evaluation_results, f, indent=4)
 
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         help="Directory that holds the predictions.csv file with the predictions.",
     )
     parser.add_argument(
-        "--evaluation_report",
+        "--evaluation_report_path",
         type=str,
         required=True,
         help="File that will be used to save the evaluations.",
@@ -69,4 +69,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    evaluate(args.ground_truth_dir, args.predictions_dir, args.evaluation_report)
+    evaluate(args.ground_truth_dir, args.predictions_dir, args.evaluation_report_path)

@@ -13,7 +13,7 @@ inputs:
     type: uri_folder
     description: Directory that contains the predictions.csv file which will be used as the predictions.
 outputs:
-    evaluation_report:
+    evaluation_report_path:
       type: uri_file
       description: File that will save the evaluation.
 
@@ -25,5 +25,5 @@ command: >-
   python -m evaluate
   --ground_truth_dir ${{inputs.ground_truth_dir}}
   --predictions_dir ${{inputs.predictions_dir}}
-  --evaluation_report ${{outputs.evaluation_report}}
+  --evaluation_report_path ${{outputs.evaluation_report_path}}
 

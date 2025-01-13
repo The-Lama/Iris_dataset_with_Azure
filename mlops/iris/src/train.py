@@ -1,4 +1,5 @@
 import argparse
+import json
 import joblib
 import logging
 import mlflow
@@ -22,7 +23,7 @@ def load_training_data(data_dir: str) -> tuple[pd.DataFrame, pd.Series]:
     return X_train, y_train
 
 
-def train_model(transformed_data_dir: str, model_dir: str):
+def train_model(transformed_data_dir: str, model_dir: str, model_metadata_path: str):
     """Train the model with the provided data."""
     logging.info("Starting model training.")
     logging.debug(f"Transformed data dir: {transformed_data_dir}")
@@ -35,7 +36,7 @@ def train_model(transformed_data_dir: str, model_dir: str):
     model_dir = Path(model_dir)
     model_dir.mkdir(parents=True, exist_ok=True)
 
-    with mlflow.start_run():
+    with mlflow.start_run() as run:
         model = LogisticRegression()
         model.fit(X_train, y_train)
 
@@ -45,6 +46,16 @@ def train_model(transformed_data_dir: str, model_dir: str):
         model_file_path = model_dir / "model.joblib"
         joblib.dump(model, model_file_path)
         logging.info(f"Model saved to {model_file_path}")
+
+        run_id = run.info.run_id
+        model_uri = f"runs:/{run_id}/model"
+
+        model_metadata = {
+            "run_id": run_id,
+            "model_uri": model_uri,
+        }
+        with open(model_metadata_path, "w") as f:
+            json.dump(model_metadata, f, indent=4)
 
 
 if __name__ == "__main__":
@@ -62,7 +73,17 @@ if __name__ == "__main__":
         required=True,
         help="Directory that saves the model output.",
     )
+    parser.add_argument(
+        "--model_metadata_path",
+        type=str,
+        required=True,
+        help="Path of the model metadata.",
+    )
 
     args = parser.parse_args()
 
-    train_model(args.transformed_data_dir, args.model_dir)
+    train_model(
+        args.transformed_data_dir,
+        args.model_dir,
+        args.model_metadata_path,
+    )

@@ -14,6 +14,12 @@ inputs:
 outputs:
   model_dir:
     type: uri_folder
+    description:
+      Directory that will save the model created by MLFlow.
+  model_metadata_path:
+    type: uri_file
+    description: 
+      Json file that will store the run_id and model_uri.
 
 code: ../src/
 environment:
@@ -23,3 +29,4 @@ command: >-
   python -m train
   --transformed_data_dir ${{inputs.transformed_data_dir}}
   --model_dir ${{outputs.model_dir}}
+  --model_metadata_path ${{outputs.model_metadata_path}}

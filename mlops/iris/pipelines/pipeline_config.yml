@@ -1,0 +1,8 @@
+experiment_name: "ML_with_Iris_Dataset"
+raw_data_path: "mlops/iris/data/iris.csv"
+components_dir: "mlops/iris/components"
+conda_env_path: "mlops/iris/environments/ml-environment.yml"
+environment_name: "iris-ml"
+environment_description: "environment to run the ml code"
+model_name: "Logistic_Regression_on_Iris_Dataset"
+register_model: True
